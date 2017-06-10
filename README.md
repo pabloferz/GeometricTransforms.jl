@@ -1,13 +1,10 @@
-# Shapes.jl
+# GeometricTransforms.jl
 
 Simple [Julia](https://julialang.org/) library, that defines some origin
 centered geometric objects (`Ellipsoid`, `TruncatedSquarePyramid`, `Torus`,
 among others).
 
-It extends the `Base` method `in` to determine if a point in three dimensions
-lies within the volume defined by each object.
-
-Another pair of useful functions here are `transform(f, s::AbstractShape)` and 
+The main functions here are `transform(f, s::AbstractShape)` and 
 `transform_bounds(s::AbstractShape)`. The first one maps a function `f(x, y, z)`
 to another `g(λ, μ, ν) * J(λ, μ, ν)`, where `g(λ, μ, ν)` is basically
 `f(x, y, z)` within the volume of a shape `s` but under a change of variables to
@@ -20,6 +17,9 @@ of the transformation.
 [NIntegration.jl](https://github.com/pabloferz/NIntegration.jl), to find out the
 integral of the function `f` within the region bounded by the surface of the
 shape `s`.
+
+It also extends the `Base` method `in` to determine if a point in three dimensions
+lies within the volume defined by each object.
 
 ## Installation
 
