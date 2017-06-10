@@ -1,6 +1,6 @@
 __precompile__()
 
-module Shapes
+module GeometricTransforms
 
 
 ### Dependencies
