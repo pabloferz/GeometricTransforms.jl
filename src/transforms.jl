@@ -1,181 +1,159 @@
-### Coordinate transforms
+"""    transform(f, s::AbstractShape)
 
-# Types
-for (S, T) in ((:AbstractShape, :AbstractShapeTransform),
-               (:Sphere,        :SphereTransform       ),
-               (:Torus,         :TorusTransform        ))
+Maps a function `f(x, y, z)` to another `g(λ, μ, ν) * J(λ, μ, ν)`, where
+`g(λ, μ, ν)` is basically `f(x(λ, μ, ν), y(λ, μ, ν), z(λ, μ, ν))` within the
+volume of the shape `s` but under a change of variables to a rectangular
+domain, and `J(λ, μ, ν)` is the Jacobian determinant of the transformation. The
+limits of the domain are given by `transform_bounds(s)`
+"""
+function transform(f, s::AbstractShape)
+    function g(x, y, z)
+        p = Point(x, y, z)
+        r = f(x, y, z)
+        return ifelse(p in s, r, zero(r))
+    end
+    return g
+end
+
+"""    ptransform(s::AbstractShape)
+
+Returns a function that maps a point `(λ, μ, ν)` on the domain given by
+`transform_bounds(s)` to a tuple `(j, x, y, z)`, where `p = (x, y, z)`
+corresponds to the cartesian coordinates of a point inside `s`, and `j` is the
+is the Jacobian determinant of the transformation `(x, y, z) ↦ (λ, μ, ν)`
+evaluated on `p`.
+"""
+function ptransform end
+
+for S in (:Cube, :Cylinder, :Ellipsoid, :EllipticCylinder, :Parallelepiped,
+          :RectangularPyramid, :Sphere, :SphericalCap, :SquarePyramid,
+          :Torus, :TSP)
+
+    T = Symbol(S, :PT)
+
     @eval begin
-        immutable $T{F,S} <: Function
-            f::F
-            s::S
-        end
-        transform{F}(f::F, s::$S) = $T(f, s)
+        ptransform(s::$S) = $T(s)
+        transform{F}(f::F, s::$S) = Transform(f, $T(s))
     end
 end
 
-for (S, T) in ((:Ellipsoid,          :EllipsoidTransform         ),
-               (:Cylinder,           :CylinderTransform          ),
-               (:EllipticCylinder,   :EllipticCylinderTransform  ),
-               (:Cube,               :CubeTransform              ),
-               (:Parallelepiped,     :ParallelepipedTransform    ),
-               (:SquarePyramid,      :SquarePyramidTransform     ),
-               (:RectangularPyramid, :RectangularPyramidTransform))
-    @eval begin
-        immutable $T{F,S,W} <: Function
-            f::F
-            s::S
-            w::W
-        end
-        transform{F}(f::F, s::$S) = $T(f, s)
-    end
+function (T::Transform)(λ, μ, ν)
+    j, x, y, z = T.p(λ, μ, ν)
+    return j * T.f(x, y, z)
 end
 
-for (S, T) in ((:TSP,          :TSPTransform         ),
-               (:SphericalCap, :SphericalCapTransform))
-    @eval begin
-        immutable $T{F,S,A,W} <: Function
-            f::F
-            s::S
-            a::A
-            w::W
-        end
-        transform{F}(f::F, s::$S) = $T(f, s)
-    end
-end
-
-# Constructors
-for (S, T) in ((:Ellipsoid,          :EllipsoidTransform         ),
-               (:EllipticCylinder,   :EllipticCylinderTransform  ),
-               (:RectangularPyramid, :RectangularPyramidTransform),
-               (:Parallelepiped,     :ParallelepipedTransform    ))
-    @eval begin
-        $T{F}(f::F, s::$S) = $T(f, s, s.a * s.b * s.c)
-    end
-end
-
-SphericalCapTransform{F}(f::F, s::SphericalCap) =
-    SphericalCapTransform(f, s, 2 * (s.a / 2s.c)^2 + 2, s.c^3)
-
-CylinderTransform{F}(f::F, s::Cylinder) =
-    CylinderTransform(f, s, s.c * s.r)
-
-CubeTransform{F}(f::F, s::Cube) =
-    CubeTransform(f, s, s.a^3)
-
-SquarePyramidTransform{F}(f::F, s::SquarePyramid) =
-    SquarePyramidTransform(f, s, s.a^2 * s.b)
-
-TSPTransform{F}(f::F, s::TSP) =
-    TSPTransform(f, s, s.b * s.r, s.a^2 * s.b * s.r)
-
-# Functors
-function (T::AbstractShapeTransform)(x, y, z)
-    p = Point(x, y, z)
-    r = T.f(x, y, z)
-    return ifelse(p in T.s, r, zero(r))
-end
-
-function (T::SphereTransform)(λ, θ, φ)
+@inline function (T::SpherePT)(λ, θ, φ)
     sθ, cθ = sincos(θ)
     sφ, cφ = sincos(φ)
     r = λ * T.s.r
     rsθ = r * sθ
+    j = T.s.r * r * rsθ
     x = rsθ * cφ
     y = rsθ * sφ
     z = r * cθ
-    return T.f(x, y, z) * T.s.r * r * rsθ
+    return j, x, y, z
 end
 
-function (T::SphericalCapTransform)(λ, φ, ν)
+@inline function (T::SphericalCapPT)(λ, φ, ν)
     sφ, cφ = sincos(φ)
     κ = 1 - ν
     μ = κ * (T.a - κ)
     k = λ * √μ
+    j = T.w * λ * μ
     x = k * cφ
     y = k * sφ
     z = T.s.c * ν
-    return T.f(x, y, z) * T.w * λ * μ
+    return j, x, y, z
 end
 
-function (T::EllipsoidTransform)(λ, θ, φ)
+@inline function (T::EllipsoidPT)(λ, θ, φ)
     sθ, cθ = sincos(θ)
     sφ, cφ = sincos(φ)
     λsθ = λ * sθ
+    j = T.w * λ * λsθ
     x = λsθ * T.s.a * cφ
     y = λsθ * T.s.b * sφ
     z = λ * T.s.c * cθ
-    return T.f(x, y, z) * T.w * λ * λsθ
+    return j, x, y, z
 end
 
-function (T::CylinderTransform)(λ, φ, ν)
+@inline function (T::CylinderPT)(λ, φ, ν)
     sφ, cφ = sincos(φ)
     ρ = λ * T.s.r
+    j = T.w * ρ
     x = ρ * cφ
     y = ρ * sφ
     z = ν * T.s.c
-    return T.f(x, y, z) * T.w * ρ
+    return j, x, y, z
 end
 
-function (T::EllipticCylinderTransform)(λ, φ, ν)
+@inline function (T::EllipticCylinderPT)(λ, φ, ν)
     sφ, cφ = sincos(φ)
+    j = T.w * λ
     x = λ * T.s.a * cφ
     y = λ * T.s.b * sφ
     z = ν * T.s.c
-    return T.f(x, y, z) * T.w * λ
+    return j, x, y, z
 end
 
-function (T::CubeTransform)(λ, μ, ν)
+@inline function (T::CubePT)(λ, μ, ν)
+    j = T.w
     x = T.s.a * λ
     y = T.s.a * μ
     z = T.s.a * ν
-    return T.f(x, y, z) * T.w
+    return j, x, y, z
 end
 
-function (T::ParallelepipedTransform)(λ, μ, ν)
+@inline function (T::ParallelepipedPT)(λ, μ, ν)
+    j = T.w
     x = T.s.a * λ
     y = T.s.b * μ
     z = T.s.c * ν
-    return T.f(x, y, z) * T.w
+    return j, x, y, z
 end
 
-function (T::SquarePyramidTransform)(λ, μ, ν)
+@inline function (T::SquarePyramidPT)(λ, μ, ν)
     κ = (1 - ν) / 2
     κa = κ * T.s.a
+    j = T.w * κ^2
     x = κa * λ
     y = κa * μ
     z = T.s.b * ν
-    return T.f(x, y, z) * T.w * κ^2
+    return j, x, y, z
 end
 
-function (T::RectangularPyramidTransform)(λ, μ, ν)
+@inline function (T::RectangularPyramidPT)(λ, μ, ν)
     κ = (1 - ν) / 2
+    j = T.w * κ^2
     x = κ * T.s.a * λ
     y = κ * T.s.b * μ
     z = T.s.c * ν
-    return T.f(x, y, z) * T.w * κ^2
+    return j, x, y, z
 end
 
-function (T::TSPTransform)(λ, μ, ν)
+@inline function (T::TSPPT)(λ, μ, ν)
     κ = (2 - T.s.r * (1 + ν)) / 2
     κa = κ * T.s.a
+    j = T.w * κ^2
     x = κa * λ
     y = κa * μ
     z = T.a * ν
-    return T.f(x, y, z) * T.w * κ^2
+    return j, x, y, z
 end
 
-function (T::TorusTransform)(λ, θ, φ)
+@inline function (T::TorusPT)(λ, θ, φ)
     sθ, cθ = sincos(θ)
     sφ, cφ = sincos(φ)
     rλ = T.s.r * λ
     ρ = rλ * cθ + T.s.R
+    j = T.s.r * rλ * ρ
     x = ρ * cφ
     y = ρ * sφ
     z = rλ * sθ
-    return T.f(x, y, z) * T.s.r * rλ * ρ
+    return j, x, y, z
 end
 
-# Variables domains
+### Variables domains
 transform_bounds(::Sphere            ) = (( 0.0,  0.0,  0.0), (1.0,  1π,  2π))
 transform_bounds(::Ellipsoid         ) = (( 0.0,  0.0,  0.0), (1.0,  1π,  2π))
 transform_bounds(::SphericalCap      ) = (( 0.0,  0.0, -1.0), (1.0,  2π, 1.0))

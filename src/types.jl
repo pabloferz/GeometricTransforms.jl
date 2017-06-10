@@ -1,3 +1,4 @@
+### Geometric objects
 @compat abstract type AbstractShape{T} <: FieldVector{T} end
 
 immutable Cube{T} <: AbstractShape{T}
@@ -142,3 +143,65 @@ end
 Vec(x, y, z) = Vec(promote(x, y, z)...)
 
 const Point = Vec
+
+
+### Coordinate transforms
+@compat abstract type AbstractPointTransform <: Function end
+
+immutable Transform{F,PT<:AbstractPointTransform} <: Function
+    f::F
+    p::PT
+end
+
+for S in (:Sphere, :Torus)
+
+    T = Symbol(S, :PT)
+
+    @eval begin
+        immutable $T{S} <: AbstractPointTransform
+            s::S
+        end
+    end
+end
+
+for S in (:Cube, :Cylinder, :Ellipsoid, :EllipticCylinder, :Parallelepiped,
+          :RectangularPyramid, :SquarePyramid)
+
+    T = Symbol(S, :PT)
+
+    @eval begin
+        immutable $T{S,W} <: AbstractPointTransform
+            s::S
+            w::W
+        end
+    end
+end
+
+for S in (:TSP, :SphericalCap)
+
+    T = Symbol(S, :PT)
+
+    @eval begin
+        immutable $T{S,A,W} <: AbstractPointTransform
+            s::S
+            a::A
+            w::W
+        end
+    end
+end
+
+# Constructors
+for S in (:Ellipsoid, :EllipticCylinder, :Parallelepiped, :RectangularPyramid)
+
+    T = Symbol(S, :PT)
+
+    @eval begin
+        $T(s::$S) = $T(s, s.a * s.b * s.c)
+    end
+end
+
+TSPPT(s::TSP                    ) = TSPPT(s, s.b * s.r, s.a^2 * s.b * s.r)
+CubePT(s::Cube                  ) = CubePT(s, s.a^3)
+CylinderPT(s::Cylinder          ) = CylinderPT(s, s.c * s.r)
+SphericalCapPT(s::SphericalCap  ) = SphericalCapPT(s, 2 * (s.a / 2s.c)^2 + 2, s.c^3)
+SquarePyramidPT(s::SquarePyramid) = SquarePyramidPT(s, s.a^2 * s.b)
