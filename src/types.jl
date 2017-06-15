@@ -1,4 +1,7 @@
-### Geometric objects
+#########################
+#   Geometric objects   #
+#########################
+
 @compat abstract type AbstractShape{T} <: FieldVector{T} end
 
 immutable Cube{T} <: AbstractShape{T}
@@ -15,7 +18,7 @@ immutable SphericalCap{T} <: AbstractShape{T}
     a::T
     c::T
 end
-SphericalCap(t::NTuple{2}) = SphericalCap(t...)
+SphericalCap(t::NTuple{2}) = SphericalCap(promote(t[1], t[2])...)
 
 immutable Parallelepiped{T} <: AbstractShape{T}
     a::T
@@ -144,8 +147,10 @@ Vec(x, y, z) = Vec(promote(x, y, z)...)
 
 const Point = Vec
 
+#############################
+#   Coordinate transforms   #
+#############################
 
-### Coordinate transforms
 @compat abstract type AbstractPointTransform <: Function end
 
 immutable Transform{F,PT<:AbstractPointTransform} <: Function
@@ -203,5 +208,5 @@ end
 TSPPT(s::TSP                    ) = TSPPT(s, s.b * s.r, s.a^2 * s.b * s.r)
 CubePT(s::Cube                  ) = CubePT(s, s.a^3)
 CylinderPT(s::Cylinder          ) = CylinderPT(s, s.c * s.r)
-SphericalCapPT(s::SphericalCap  ) = SphericalCapPT(s, 2 * (s.a / 2s.c)^2 + 2, s.c^3)
+SphericalCapPT(s::SphericalCap  ) = SphericalCapPT(s, 2(s.a / 2s.c)^2 + 2, s.c^3)
 SquarePyramidPT(s::SquarePyramid) = SquarePyramidPT(s, s.a^2 * s.b)

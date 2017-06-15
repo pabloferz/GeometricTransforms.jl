@@ -1,3 +1,14 @@
+CS = Union{Cube,Sphere}
+CSCSP = Union{Cylinder,SphericalCap,SquarePyramid}
+EECPRP = Union{Ellipsoid,EllipticCylinder,Parallelepiped,RectangularPyramid}
+
+halflengths(s::CS    ) = Vec(s[1], s[1], s[1])
+halflengths(s::CSCSP ) = Vec(s[1], s[1], s[2])
+halflengths(s::EECPRP) = Vec(s[1], s[2], s[3])
+halflengths(s::TSP   ) = Vec(s[1], s[1], s[2] * s[3])
+halflengths(s::Torus ) = Vec(s[1] + s[2], s[1] + s[2], s[2])
+
+
 """    in(p::Point, s::AbstractShape)
 
 Returns `true` if the point `p` lies inside or in the boundary of `s`,
