@@ -14,3 +14,5 @@
         """, Tuple{Float64,Float64}, Tuple{Float64,Ptr{Void}}, v,
         cglobal((:sincos, Base.Math.libm)))
 end
+
+sincos(v::Real) = ( (r, i) = reim(cis(v)); (i, r) )
