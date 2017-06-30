@@ -28,10 +28,11 @@ lies within the volume defined by each object.
 
 ## Installation
 
-`Shapes.jl` works only on Julia 0.5 and can be installed from a Julia session by running
+`GeometricTransforms.jl` should work on Julia 0.5 and later versions, and can
+be installed from a Julia session by running
 
 ```julia
-julia> Pkg.clone("https://github.com/pabloferz/Shapes.jl.git")
+julia> Pkg.clone("https://github.com/pabloferz/GeometricTransforms.jl.git")
 ```
 
 ## Usage
@@ -39,13 +40,13 @@ julia> Pkg.clone("https://github.com/pabloferz/Shapes.jl.git")
 Once installed, run
 
 ```julia
-using Shapes
+using GeometricTransforms
 ```
 
 Let's see how the library can be used along an integration library to approximate the volume of a sphere of radius `1`.
 
 ```julia
-julia> using Shapes
+julia> using GeometricTransforms
 julia> using BenchmarkTools
 
 julia> Pkg.clone("https://github.com/pabloferz/NIntegration.jl.git")
@@ -91,4 +92,3 @@ julia> 4π / 3
 **TODO**
 
 - [ ] Add more shapes and transforms
-- [ ] Make it work on julia 0.6
