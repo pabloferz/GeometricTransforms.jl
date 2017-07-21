@@ -54,6 +54,20 @@ struct Cylinder{T} <: AbstractShape{3,T}
     end
 end
 
+struct HollowCylinder{T} <: AbstractShape{3,T}
+    R::T
+    r::T
+    c::T
+    function HollowCylinder{T}(R, r, c) where {T}
+        if r < 0 || c ≤ 0
+            throw(ArgumentError("All semi-lengths should be positive."))
+        elseif R < r
+            throw(ArgumentError("Outer radius `R` should be larger than `r`."))
+        end
+        return new(R, r, c)
+    end
+end
+
 struct EllipticCylinder{T} <: AbstractShape{3,T}
     a::T
     b::T
@@ -95,12 +109,27 @@ struct RectangularPyramid{T,S} <: AbstractShape{3,T}
     end
 end
 
-struct TruncatedSquarePyramid{T,S} <: AbstractShape{3,T}
+immutable TriangularToroid{T} <: AbstractShape{T}
+    r::T
+    b::T
+    c::T
+    function TriangularToroid{T}(r, b, c) where {T}
+        if r ≤ 0 || b ≤ 0 || c ≤ 0
+            throw(ArgumentError("All lengths should be positive."))
+        elseif r < b
+            throw(ArgumentError("The radius must be equal or higher than " *
+                                "the triangle base semi-length"))
+        end
+        return new(r, b, c)
+    end
+end
+
+struct TruncatedSquarePyramid{T,R,S} <: AbstractShape{3,T}
     a::T
     b::T
-    r::Float64
+    r::R
     m::S
-    function TruncatedSquarePyramid{T,S}(a, b, r::Float64, m) where {T,S}
+    function TruncatedSquarePyramid{T,R,S}(a, b, r, m) where {T,R,S}
         if a ≤ 0 || b ≤ 0
             throw(ArgumentError("All semi-lengths should be positive."))
         end

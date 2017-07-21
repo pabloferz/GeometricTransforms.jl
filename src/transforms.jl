@@ -25,9 +25,9 @@ evaluated on `p`.
 """
 function ptransform end
 
-for S in (:Cube, :Cylinder, :Ellipsoid, :EllipticCylinder, :Parallelepiped,
-          :RectangularPyramid, :Sphere, :SphericalCap, :SquarePyramid,
-          :Torus, :TSP)
+for S in (:Cube, :Cylinder, :Ellipsoid, :EllipticCylinder, :HollowCylinder,
+          :Parallelepiped, :RectangularPyramid, :Sphere, :SphericalCap,
+          :SquarePyramid, :TriangularToroid, :Torus, :TSP)
 
     T = Symbol(S, :PT)
 
@@ -87,6 +87,27 @@ end
     return j, x, y, z
 end
 
+@inline function (T::HollowCylinderPT)(λ, φ, ν)
+    sφ, cφ = sincos(φ)
+    ρ = λ * T.a + T.s.r
+    j = T.w * ρ
+    x = ρ * cφ
+    y = ρ * sφ
+    z = ν * T.s.c
+    return j, x, y, z
+end
+
+@inline function (T::TriangularToroidPT)(λ, φ, ν)
+    sφ, cφ = sincos(φ)
+    κ = 0.5 * (1 - ν)
+    ρ = λ * κ * T.s.b + T.s.r
+    j = T.w * κ * ρ
+    x = ρ * cφ
+    y = ρ * sφ
+    z = ν * T.s.c
+    return j, x, y, z
+end
+
 @inline function (T::EllipticCylinderPT)(λ, φ, ν)
     sφ, cφ = sincos(φ)
     j = T.w * λ
@@ -113,7 +134,7 @@ end
 end
 
 @inline function (T::SquarePyramidPT)(λ, μ, ν)
-    κ = (1 - ν) / 2
+    κ = 0.5 * (1 - ν)
     κa = κ * T.s.a
     j = T.w * κ^2
     x = κa * λ
@@ -123,7 +144,7 @@ end
 end
 
 @inline function (T::RectangularPyramidPT)(λ, μ, ν)
-    κ = (1 - ν) / 2
+    κ = 0.5 * (1 - ν)
     j = T.w * κ^2
     x = κ * T.s.a * λ
     y = κ * T.s.b * μ
@@ -132,7 +153,7 @@ end
 end
 
 @inline function (T::TSPPT)(λ, μ, ν)
-    κ = (2 - T.s.r * (1 + ν)) / 2
+    κ = 0.5 * (2 - T.s.r * (1 + ν))
     κa = κ * T.s.a
     j = T.w * κ^2
     x = κa * λ
@@ -158,7 +179,9 @@ transform_bounds(::Sphere            ) = (( 0.0,  0.0,  0.0), (1.0,  1π,  2π))
 transform_bounds(::Ellipsoid         ) = (( 0.0,  0.0,  0.0), (1.0,  1π,  2π))
 transform_bounds(::SphericalCap      ) = (( 0.0,  0.0, -1.0), (1.0,  2π, 1.0))
 transform_bounds(::Cylinder          ) = (( 0.0,  -1π, -1.0), (1.0,  1π, 1.0))
+transform_bounds(::HollowCylinder    ) = (( 0.0,  -1π, -1.0), (1.0,  1π, 1.0))
 transform_bounds(::EllipticCylinder  ) = (( 0.0,  -1π, -1.0), (1.0,  1π, 1.0))
+transform_bounds(::TriangularToroid  ) = ((-1.0,  -1π, -1.0), (1.0,  1π, 1.0))
 transform_bounds(::Cube              ) = ((-1.0, -1.0, -1.0), (1.0, 1.0, 1.0))
 transform_bounds(::Parallelepiped    ) = ((-1.0, -1.0, -1.0), (1.0, 1.0, 1.0))
 transform_bounds(::RectangularPyramid) = ((-1.0, -1.0, -1.0), (1.0, 1.0, 1.0))

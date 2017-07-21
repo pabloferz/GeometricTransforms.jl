@@ -25,6 +25,12 @@ Parallelepiped(a, b, c) = (t = promote(a, b, c);
 EllipticCylinder(a, b, c) = (t = promote(a, b, c);
     EllipticCylinder{eltype(t)}(t...))
 
+HollowCylinder(R, r, c) = (t = promote(R, r, c);
+    HollowCylinder{eltype(t)}(t...))
+
+TriangularToroid(r, b, c) = (t = promote(r, b, c);
+    TriangularToroid{eltype(t)}(t...))
+
 SquarePyramid(a, b) = (t = promote(a, b); m = 2b / a;
     SquarePyramid{eltype(t),typeof(m)}(t..., m))
 
@@ -37,11 +43,11 @@ RectangularPyramid(a, b, c) = (t = promote(a, b, c); ma = 2c / a; mb = 2c / b;
 RectangularPyramid{T}(a, b, c, ma::T, mb::T) = (t = promote(a, b, c);
     RectangularPyramid{eltype(t),T}(t..., ma, mb))
 
-TSP(a, b, r::Float64) = (t = promote(a, b); m = 2b / a;
-    TSP{eltype(t),typeof(m)}(t..., r, m))
+TSP{R}(a, b, r::R) = (t = promote(a, b); m = 2b / a;
+    TSP{eltype(t),R,typeof(m)}(t..., r, m))
 
-TSP{T}(a, b, r::Float64, m::T) = (t = promote(a, b);
-    TSP{eltype(t),T}(t..., r, m))
+TSP{R,S}(a, b, r::R, m::S) = (t = promote(a, b);
+    TSP{eltype(t),R,S}(t..., r, m))
 
 Vec(x, y, z) = (t = promote(x, y, z); Vec{eltype(t)}(t...))
 
@@ -68,7 +74,7 @@ for S in (:Sphere, :Torus)
 end
 
 for S in (:Cube, :Cylinder, :Ellipsoid, :EllipticCylinder, :Parallelepiped,
-          :RectangularPyramid, :SquarePyramid)
+          :RectangularPyramid, :SquarePyramid, :TriangularToroid)
 
     T = Symbol(S, :PT)
 
@@ -80,7 +86,7 @@ for S in (:Cube, :Cylinder, :Ellipsoid, :EllipticCylinder, :Parallelepiped,
     end
 end
 
-for S in (:TSP, :SphericalCap)
+for S in (:HollowCylinder, :TSP, :SphericalCap)
 
     T = Symbol(S, :PT)
 
@@ -103,8 +109,14 @@ for S in (:Ellipsoid, :EllipticCylinder, :Parallelepiped, :RectangularPyramid)
     end
 end
 
-TSPPT(s::TSP                    ) = TSPPT(s, s.b * s.r, s.a^2 * s.b * s.r)
-CubePT(s::Cube                  ) = CubePT(s, s.a^3)
-CylinderPT(s::Cylinder          ) = CylinderPT(s, s.c * s.r)
-SphericalCapPT(s::SphericalCap  ) = SphericalCapPT(s, 2(s.a / 2s.c)^2 + 2, s.c^3)
-SquarePyramidPT(s::SquarePyramid) = SquarePyramidPT(s, s.a^2 * s.b)
+TSPPT(s::TSP                          ) = TSPPT(s, s.b * s.r, s.a^2 * s.b * s.r)
+CubePT(s::Cube                        ) = CubePT(s, s.a^3)
+CylinderPT(s::Cylinder                ) = CylinderPT(s, s.c * s.r)
+SquarePyramidPT(s::SquarePyramid      ) = SquarePyramidPT(s, s.a^2 * s.b)
+TriangularToroidPT(s::TriangularToroid) = TriangularToroidPT(s, s.b * s.c)
+
+SphericalCapPT(s::SphericalCap) =
+    SphericalCapPT(s, 2 * (s.a / 2s.c)^2 + 2, s.c^3)
+
+HollowCylinderPT(s::HollowCylinder) =
+    HollowCylinderPT(s, s.R - s.r, s.c * (s.R - s.r))

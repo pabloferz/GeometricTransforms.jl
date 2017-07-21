@@ -21,9 +21,10 @@ include(joinpath(path, "transforms.jl"))
 
 ### Exports
 export AbstractShape, Cube, Cylinder, Ellipsoid, EllipticCylinder,
-       Parallelepiped, Point, RectangularPyramid, Sphere, SphericalCap,
-       SquarePyramid, TSP, TruncatedSquarePyramid, Torus, Vec,
-       halflengths, ptransform, transform, transform_bounds
+       HollowCylinder, Parallelepiped, Point, RectangularPyramid, Sphere,
+       SphericalCap, SquarePyramid, TSP, TriangularToroid,
+       TruncatedSquarePyramid, Torus, Vec, halflengths, ptransform, transform,
+       transform_bounds
 
 
 end # module

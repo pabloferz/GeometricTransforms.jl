@@ -13,7 +13,7 @@ immutable SphericalCap{T} <: AbstractShape{T}
     c::T
     function SphericalCap(a, c)
         if a < 0 || c ≤ 0
-            throw(ArgumentError("All semi-lengths should be positive."))
+            throw(ArgumentError("All lengths should be positive."))
         end
         return new(a, c)
     end
@@ -25,7 +25,7 @@ immutable Parallelepiped{T} <: AbstractShape{T}
     c::T
     function Parallelepiped(a, b, c)
         if a ≤ 0 || b ≤ 0 || c ≤ 0
-            throw(ArgumentError("All semi-lengths should be positive."))
+            throw(ArgumentError("All lengths should be positive."))
         end
         return new(a, b, c)
     end
@@ -37,7 +37,7 @@ immutable Ellipsoid{T} <: AbstractShape{T}
     c::T
     function Ellipsoid(a, b, c)
         if a ≤ 0 || b ≤ 0 || c ≤ 0
-            throw(ArgumentError("All semi-lengths should be positive."))
+            throw(ArgumentError("All lengths should be positive."))
         end
         return new(a, b, c)
     end
@@ -48,9 +48,23 @@ immutable Cylinder{T} <: AbstractShape{T}
     c::T
     function Cylinder(r, c)
         if r ≤ 0 || c ≤ 0
-            throw(ArgumentError("All semi-lengths should be positive."))
+            throw(ArgumentError("All lengths should be positive."))
         end
         return new(r, c)
+    end
+end
+
+immutable HollowCylinder{T} <: AbstractShape{T}
+    R::T
+    r::T
+    c::T
+    function HollowCylinder(R, r, c)
+        if r < 0 || c ≤ 0
+            throw(ArgumentError("All lengths should be positive."))
+        elseif R < r
+            throw(ArgumentError("Outer radius `R` should be larger than `r`."))
+        end
+        return new(R, r, c)
     end
 end
 
@@ -60,7 +74,7 @@ immutable EllipticCylinder{T} <: AbstractShape{T}
     c::T
     function EllipticCylinder(a, b, c)
         if a ≤ 0 || b ≤ 0 || c ≤ 0
-            throw(ArgumentError("All semi-lengths should be positive."))
+            throw(ArgumentError("All lengths should be positive."))
         end
         return new(a, b, c)
     end
@@ -72,7 +86,7 @@ immutable SquarePyramid{T,S} <: AbstractShape{T}
     m::S
     function SquarePyramid(a, b, m)
         if a ≤ 0 || b ≤ 0
-            throw(ArgumentError("All semi-lengths should be positive."))
+            throw(ArgumentError("All lengths should be positive."))
         end
         @assert m == 2b / a
         return new(a, b, m)
@@ -87,7 +101,7 @@ immutable RectangularPyramid{T,S} <: AbstractShape{T}
     mb::S
     function RectangularPyramid(a, b, c, ma, mb)
         if a ≤ 0 || b ≤ 0 || c ≤ 0
-            throw(ArgumentError("All semi-lengths should be positive."))
+            throw(ArgumentError("All lengths should be positive."))
         end
         @assert ma == 2c / a
         @assert mb == 2c / b
@@ -95,14 +109,29 @@ immutable RectangularPyramid{T,S} <: AbstractShape{T}
     end
 end
 
-immutable TruncatedSquarePyramid{T,S} <: AbstractShape{T}
+immutable TriangularToroid{T} <: AbstractShape{T}
+    r::T
+    b::T
+    c::T
+    function TriangularToroid(r, b, c)
+        if r ≤ 0 || b ≤ 0 || c ≤ 0
+            throw(ArgumentError("All lengths should be positive."))
+        elseif r < b
+            throw(ArgumentError("The radius must be equal or higher than " *
+                                "the triangle base semi-length"))
+        end
+        return new(r, b, c)
+    end
+end
+
+immutable TruncatedSquarePyramid{T,R,S} <: AbstractShape{T}
     a::T
     b::T
-    r::Float64
+    r::R
     m::S
-    function TruncatedSquarePyramid(a, b, r::Float64, m)
+    function TruncatedSquarePyramid(a, b, r, m)
         if a ≤ 0 || b ≤ 0
-            throw(ArgumentError("All semi-lengths should be positive."))
+            throw(ArgumentError("All lengths should be positive."))
         end
         @assert 0 < r ≤ 1
         @assert m == 2b / a

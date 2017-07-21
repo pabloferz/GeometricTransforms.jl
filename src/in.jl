@@ -1,12 +1,15 @@
-CS = Union{Cube,Sphere}
-CSCSP = Union{Cylinder,SphericalCap,SquarePyramid}
-EECPRP = Union{Ellipsoid,EllipticCylinder,Parallelepiped,RectangularPyramid}
+SameXYZLength = Union{Cube,Sphere}
+SameXYLength  = Union{Cylinder,SphericalCap,SquarePyramid}
+NoSameLength  = Union{Ellipsoid,EllipticCylinder,Parallelepiped,
+                      RectangularPyramid}
 
-halflengths(s::CS    ) = Vec(s[1], s[1], s[1])
-halflengths(s::CSCSP ) = Vec(s[1], s[1], s[2])
-halflengths(s::EECPRP) = Vec(s[1], s[2], s[3])
-halflengths(s::TSP   ) = Vec(s[1], s[1], s[2] * s[3])
-halflengths(s::Torus ) = Vec(s[1] + s[2], s[1] + s[2], s[2])
+halflengths(s::SameXYZLength   ) = Vec(s[1], s[1], s[1])
+halflengths(s::SameXYLength    ) = Vec(s[1], s[1], s[2])
+halflengths(s::NoSameLength    ) = Vec(s[1], s[2], s[3])
+halflengths(s::HollowCylinder  ) = Vec(s[1], s[1], s[3])
+halflengths(s::TSP             ) = Vec(s[1], s[1], s[2] * s[3])
+halflengths(s::Torus           ) = Vec(s[1] + s[2], s[1] + s[2], s[2])
+halflengths(s::TriangularToroid) = Vec(s[1] + s[2], s[1] + s[2], s[3])
 
 
 """    in(p::Point, s::AbstractShape)
