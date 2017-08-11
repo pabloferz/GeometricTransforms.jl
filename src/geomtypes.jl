@@ -13,33 +13,25 @@ struct SphericalCap{T} <: AbstractShape{3,T}
     c::T
     function SphericalCap{T}(a, c) where {T}
         if a < 0 || c ≤ 0
-            throw(ArgumentError("All semi-lengths should be positive."))
+            throw(ArgumentError("All lengths should be positive."))
         end
         return new(a, c)
     end
 end
 
-struct Parallelepiped{T} <: AbstractShape{3,T}
-    a::T
-    b::T
-    c::T
-    function Parallelepiped{T}(a, b, c) where {T}
-        if a ≤ 0 || b ≤ 0 || c ≤ 0
-            throw(ArgumentError("All semi-lengths should be positive."))
+for shape in (:Ellipsoid, :EllipticCylinder, :HemiEllipsoid, :Parallelepiped)
+    @eval begin
+        struct $shape{T} <: AbstractShape{3,T}
+            a::T
+            b::T
+            c::T
+            function $shape{T}(a, b, c) where {T}
+                if a ≤ 0 || b ≤ 0 || c ≤ 0
+                    throw(ArgumentError("All lengths should be positive."))
+                end
+                return new(a, b, c)
+            end
         end
-        return new(a, b, c)
-    end
-end
-
-struct Ellipsoid{T} <: AbstractShape{3,T}
-    a::T
-    b::T
-    c::T
-    function Ellipsoid{T}(a, b, c) where {T}
-        if a ≤ 0 || b ≤ 0 || c ≤ 0
-            throw(ArgumentError("All semi-lengths should be positive."))
-        end
-        return new(a, b, c)
     end
 end
 
@@ -48,7 +40,7 @@ struct Cylinder{T} <: AbstractShape{3,T}
     c::T
     function Cylinder{T}(r, c) where {T}
         if r ≤ 0 || c ≤ 0
-            throw(ArgumentError("All semi-lengths should be positive."))
+            throw(ArgumentError("All lengths should be positive."))
         end
         return new(r, c)
     end
@@ -60,23 +52,11 @@ struct HollowCylinder{T} <: AbstractShape{3,T}
     c::T
     function HollowCylinder{T}(R, r, c) where {T}
         if r < 0 || c ≤ 0
-            throw(ArgumentError("All semi-lengths should be positive."))
+            throw(ArgumentError("All lengths should be positive."))
         elseif R < r
             throw(ArgumentError("Outer radius `R` should be larger than `r`."))
         end
         return new(R, r, c)
-    end
-end
-
-struct EllipticCylinder{T} <: AbstractShape{3,T}
-    a::T
-    b::T
-    c::T
-    function EllipticCylinder{T}(a, b, c) where {T}
-        if a ≤ 0 || b ≤ 0 || c ≤ 0
-            throw(ArgumentError("All semi-lengths should be positive."))
-        end
-        return new(a, b, c)
     end
 end
 
@@ -86,7 +66,7 @@ struct SquarePyramid{T,S} <: AbstractShape{3,T}
     m::S
     function SquarePyramid{T,S}(a, b, m) where {T,S}
         if a ≤ 0 || b ≤ 0
-            throw(ArgumentError("All semi-lengths should be positive."))
+            throw(ArgumentError("All lengths should be positive."))
         end
         @assert m == 2b / a
         return new(a, b, m)
@@ -101,7 +81,7 @@ struct RectangularPyramid{T,S} <: AbstractShape{3,T}
     mb::S
     function RectangularPyramid{T,S}(a, b, c, ma, mb) where {T,S}
         if a ≤ 0 || b ≤ 0 || c ≤ 0
-            throw(ArgumentError("All semi-lengths should be positive."))
+            throw(ArgumentError("All lengths should be positive."))
         end
         @assert ma == 2c / a
         @assert mb == 2c / b

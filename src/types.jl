@@ -19,6 +19,8 @@ SphericalCap(a, c) = (t = promote(a, c); SphericalCap{eltype(t)}(t...))
 
 Ellipsoid(a, b, c) = (t = promote(a, b, c); Ellipsoid{eltype(t)}(t...))
 
+HemiEllipsoid(a, b, c) = (t = promote(a, b, c); HemiEllipsoid{eltype(t)}(t...))
+
 Parallelepiped(a, b, c) = (t = promote(a, b, c);
     Parallelepiped{eltype(t)}(t...))
 
@@ -73,8 +75,9 @@ for S in (:Sphere, :Torus)
     end
 end
 
-for S in (:Cube, :Cylinder, :Ellipsoid, :EllipticCylinder, :Parallelepiped,
-          :RectangularPyramid, :SquarePyramid, :TriangularToroid)
+for S in (:Cube, :Cylinder, :Ellipsoid, :EllipticCylinder, :HemiEllipsoid,
+          :Parallelepiped, :RectangularPyramid, :SquarePyramid,
+          :TriangularToroid)
 
     T = Symbol(S, :PT)
 
@@ -100,7 +103,8 @@ for S in (:HollowCylinder, :TSP, :SphericalCap)
 end
 
 ### Constructors
-for S in (:Ellipsoid, :EllipticCylinder, :Parallelepiped, :RectangularPyramid)
+for S in (:Ellipsoid, :EllipticCylinder, :HemiEllipsoid, :Parallelepiped,
+          :RectangularPyramid)
 
     T = Symbol(S, :PT)
 
@@ -110,9 +114,13 @@ for S in (:Ellipsoid, :EllipticCylinder, :Parallelepiped, :RectangularPyramid)
 end
 
 TSPPT(s::TSP                          ) = TSPPT(s, s.b * s.r, s.a^2 * s.b * s.r)
+
 CubePT(s::Cube                        ) = CubePT(s, s.a^3)
+
 CylinderPT(s::Cylinder                ) = CylinderPT(s, s.c * s.r)
+
 SquarePyramidPT(s::SquarePyramid      ) = SquarePyramidPT(s, s.a^2 * s.b)
+
 TriangularToroidPT(s::TriangularToroid) = TriangularToroidPT(s, s.b * s.c)
 
 SphericalCapPT(s::SphericalCap) =

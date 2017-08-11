@@ -1,6 +1,6 @@
 SameXYZLength = Union{Cube,Sphere}
 SameXYLength  = Union{Cylinder,SphericalCap,SquarePyramid}
-NoSameLength  = Union{Ellipsoid,EllipticCylinder,Parallelepiped,
+NoSameLength  = Union{Ellipsoid,EllipticCylinder,HemiEllipsoid,Parallelepiped,
                       RectangularPyramid}
 
 halflengths(s::SameXYZLength   ) = Vec(s[1], s[1], s[1])

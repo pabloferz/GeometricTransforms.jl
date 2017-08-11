@@ -25,9 +25,9 @@ evaluated on `p`.
 """
 function ptransform end
 
-for S in (:Cube, :Cylinder, :Ellipsoid, :EllipticCylinder, :HollowCylinder,
-          :Parallelepiped, :RectangularPyramid, :Sphere, :SphericalCap,
-          :SquarePyramid, :TriangularToroid, :Torus, :TSP)
+for S in (:Cube, :Cylinder, :Ellipsoid, :EllipticCylinder, :HemiEllipsoid,
+          :HollowCylinder, :Parallelepiped, :RectangularPyramid, :Sphere,
+          :SphericalCap, :SquarePyramid, :TriangularToroid, :Torus, :TSP)
 
     T = Symbol(S, :PT)
 
@@ -74,6 +74,17 @@ end
     x = λsθ * T.s.a * cφ
     y = λsθ * T.s.b * sφ
     z = λ * T.s.c * cθ
+    return j, x, y, z
+end
+
+@inline function (T::HemiEllipsoidPT)(λ, θ, φ)
+    sθ, cθ = sincos(θ)
+    sφ, cφ = sincos(φ)
+    λsθ = λ * sθ
+    j = T.w * λ * λsθ
+    x = T.s.a * λsθ * cφ
+    y = T.s.b * λsθ * sφ
+    z = T.s.c * (λ * cθ - 0.5)
     return j, x, y, z
 end
 
@@ -177,11 +188,12 @@ end
 ### Variables domains
 transform_bounds(::Sphere            ) = (( 0.0,  0.0,  0.0), (1.0,  1π,  2π))
 transform_bounds(::Ellipsoid         ) = (( 0.0,  0.0,  0.0), (1.0,  1π,  2π))
-transform_bounds(::SphericalCap      ) = (( 0.0,  0.0, -1.0), (1.0,  2π, 1.0))
+transform_bounds(::HemiEllipsoid     ) = (( 0.0,  0.0,  0.0), (1.0, π/2,  2π))
 transform_bounds(::Cylinder          ) = (( 0.0,  -1π, -1.0), (1.0,  1π, 1.0))
 transform_bounds(::HollowCylinder    ) = (( 0.0,  -1π, -1.0), (1.0,  1π, 1.0))
 transform_bounds(::EllipticCylinder  ) = (( 0.0,  -1π, -1.0), (1.0,  1π, 1.0))
 transform_bounds(::TriangularToroid  ) = ((-1.0,  -1π, -1.0), (1.0,  1π, 1.0))
+transform_bounds(::SphericalCap      ) = (( 0.0,  0.0, -1.0), (1.0,  2π, 1.0))
 transform_bounds(::Cube              ) = ((-1.0, -1.0, -1.0), (1.0, 1.0, 1.0))
 transform_bounds(::Parallelepiped    ) = ((-1.0, -1.0, -1.0), (1.0, 1.0, 1.0))
 transform_bounds(::RectangularPyramid) = ((-1.0, -1.0, -1.0), (1.0, 1.0, 1.0))

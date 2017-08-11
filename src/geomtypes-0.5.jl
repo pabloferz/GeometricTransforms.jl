@@ -19,27 +19,19 @@ immutable SphericalCap{T} <: AbstractShape{T}
     end
 end
 
-immutable Parallelepiped{T} <: AbstractShape{T}
-    a::T
-    b::T
-    c::T
-    function Parallelepiped(a, b, c)
-        if a ≤ 0 || b ≤ 0 || c ≤ 0
-            throw(ArgumentError("All lengths should be positive."))
+for shape in (:Ellipsoid, :EllipticCylinder, :HemiEllipsoid, :Parallelepiped)
+    @eval begin
+        immutable $shape{T} <: AbstractShape{T}
+            a::T
+            b::T
+            c::T
+            function $shape(a, b, c)
+                if a ≤ 0 || b ≤ 0 || c ≤ 0
+                    throw(ArgumentError("All lengths should be positive."))
+                end
+                return new(a, b, c)
+            end
         end
-        return new(a, b, c)
-    end
-end
-
-immutable Ellipsoid{T} <: AbstractShape{T}
-    a::T
-    b::T
-    c::T
-    function Ellipsoid(a, b, c)
-        if a ≤ 0 || b ≤ 0 || c ≤ 0
-            throw(ArgumentError("All lengths should be positive."))
-        end
-        return new(a, b, c)
     end
 end
 
@@ -65,18 +57,6 @@ immutable HollowCylinder{T} <: AbstractShape{T}
             throw(ArgumentError("Outer radius `R` should be larger than `r`."))
         end
         return new(R, r, c)
-    end
-end
-
-immutable EllipticCylinder{T} <: AbstractShape{T}
-    a::T
-    b::T
-    c::T
-    function EllipticCylinder(a, b, c)
-        if a ≤ 0 || b ≤ 0 || c ≤ 0
-            throw(ArgumentError("All lengths should be positive."))
-        end
-        return new(a, b, c)
     end
 end
 
