@@ -89,7 +89,7 @@ struct RectangularPyramid{T,S} <: Shape{3,T}
     end
 end
 
-immutable TriangularToroid{T} <: Shape{T}
+struct TriangularToroid{T} <: Shape{3,T}
     r::T
     b::T
     c::T
