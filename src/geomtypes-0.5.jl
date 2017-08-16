@@ -1,14 +1,14 @@
-abstract AbstractShape{T} <: FieldVector{T}
+abstract Shape{T} <: FieldVector{T}
 
-immutable Cube{T} <: AbstractShape{T}
+immutable Cube{T} <: Shape{T}
     a::T
 end
 
-immutable Sphere{T} <: AbstractShape{T}
+immutable Sphere{T} <: Shape{T}
     r::T
 end
 
-immutable SphericalCap{T} <: AbstractShape{T}
+immutable SphericalCap{T} <: Shape{T}
     a::T
     c::T
     function SphericalCap(a, c)
@@ -19,9 +19,9 @@ immutable SphericalCap{T} <: AbstractShape{T}
     end
 end
 
-for shape in (:Ellipsoid, :EllipticCylinder, :HemiEllipsoid, :Parallelepiped)
+for shape in (:Ellipsoid, :EllipticCylinder, :Parallelepiped)
     @eval begin
-        immutable $shape{T} <: AbstractShape{T}
+        immutable $shape{T} <: Shape{T}
             a::T
             b::T
             c::T
@@ -35,7 +35,7 @@ for shape in (:Ellipsoid, :EllipticCylinder, :HemiEllipsoid, :Parallelepiped)
     end
 end
 
-immutable Cylinder{T} <: AbstractShape{T}
+immutable Cylinder{T} <: Shape{T}
     r::T
     c::T
     function Cylinder(r, c)
@@ -46,7 +46,7 @@ immutable Cylinder{T} <: AbstractShape{T}
     end
 end
 
-immutable HollowCylinder{T} <: AbstractShape{T}
+immutable HollowCylinder{T} <: Shape{T}
     R::T
     r::T
     c::T
@@ -60,7 +60,7 @@ immutable HollowCylinder{T} <: AbstractShape{T}
     end
 end
 
-immutable SquarePyramid{T,S} <: AbstractShape{T}
+immutable SquarePyramid{T,S} <: Shape{T}
     a::T
     b::T
     m::S
@@ -73,7 +73,7 @@ immutable SquarePyramid{T,S} <: AbstractShape{T}
     end
 end
 
-immutable RectangularPyramid{T,S} <: AbstractShape{T}
+immutable RectangularPyramid{T,S} <: Shape{T}
     a::T
     b::T
     c::T
@@ -89,7 +89,7 @@ immutable RectangularPyramid{T,S} <: AbstractShape{T}
     end
 end
 
-immutable TriangularToroid{T} <: AbstractShape{T}
+immutable TriangularToroid{T} <: Shape{T}
     r::T
     b::T
     c::T
@@ -104,7 +104,7 @@ immutable TriangularToroid{T} <: AbstractShape{T}
     end
 end
 
-immutable TruncatedSquarePyramid{T,R,S} <: AbstractShape{T}
+immutable TruncatedSquarePyramid{T,R,S} <: Shape{T}
     a::T
     b::T
     r::R
@@ -119,7 +119,7 @@ immutable TruncatedSquarePyramid{T,R,S} <: AbstractShape{T}
     end
 end
 
-immutable Torus{T} <: AbstractShape{T}
+immutable Torus{T} <: Shape{T}
     R::T
     r::T
 end

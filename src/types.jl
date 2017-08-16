@@ -13,25 +13,16 @@ const TSP = TruncatedSquarePyramid
 const Point = Vec
 
 ### Constructors
+for S in (:Ellipsoid, :EllipticCylinder, :HollowCylinder, :Parallelepiped,
+          :TriangularToroid, :Vec)
+    @eval begin
+        $S(a, b, c) = (t = promote(a, b, c); $S{eltype(t)}(t...))
+    end
+end
+
 Cylinder(r, c) = (t = promote(r, c); Cylinder{eltype(t)}(t...))
 
 SphericalCap(a, c) = (t = promote(a, c); SphericalCap{eltype(t)}(t...))
-
-Ellipsoid(a, b, c) = (t = promote(a, b, c); Ellipsoid{eltype(t)}(t...))
-
-HemiEllipsoid(a, b, c) = (t = promote(a, b, c); HemiEllipsoid{eltype(t)}(t...))
-
-Parallelepiped(a, b, c) = (t = promote(a, b, c);
-    Parallelepiped{eltype(t)}(t...))
-
-EllipticCylinder(a, b, c) = (t = promote(a, b, c);
-    EllipticCylinder{eltype(t)}(t...))
-
-HollowCylinder(R, r, c) = (t = promote(R, r, c);
-    HollowCylinder{eltype(t)}(t...))
-
-TriangularToroid(r, b, c) = (t = promote(r, b, c);
-    TriangularToroid{eltype(t)}(t...))
 
 SquarePyramid(a, b) = (t = promote(a, b); m = 2b / a;
     SquarePyramid{eltype(t),typeof(m)}(t..., m))
@@ -51,17 +42,15 @@ TSP{R}(a, b, r::R) = (t = promote(a, b); m = 2b / a;
 TSP{R,S}(a, b, r::R, m::S) = (t = promote(a, b);
     TSP{eltype(t),R,S}(t..., r, m))
 
-Vec(x, y, z) = (t = promote(x, y, z); Vec{eltype(t)}(t...))
-
 #############################
 #   Coordinate transforms   #
 #############################
 
-@compat abstract type AbstractPointTransform <: Function end
+@compat abstract type ShapePointTransformation end
 
-immutable Transform{F,PT<:AbstractPointTransform} <: Function
+immutable FunctionTransformation{F,T<:ShapePointTransformation}
     f::F
-    p::PT
+    t::T
 end
 
 for S in (:Sphere, :Torus)
@@ -69,20 +58,19 @@ for S in (:Sphere, :Torus)
     T = Symbol(S, :PT)
 
     @eval begin
-        immutable $T{S} <: AbstractPointTransform
+        immutable $T{S} <: ShapePointTransformation
             s::S
         end
     end
 end
 
-for S in (:Cube, :Cylinder, :Ellipsoid, :EllipticCylinder, :HemiEllipsoid,
-          :Parallelepiped, :RectangularPyramid, :SquarePyramid,
-          :TriangularToroid)
+for S in (:Cube, :Cylinder, :Ellipsoid, :EllipticCylinder, :Parallelepiped,
+          :RectangularPyramid, :SquarePyramid, :TriangularToroid)
 
     T = Symbol(S, :PT)
 
     @eval begin
-        immutable $T{S,W} <: AbstractPointTransform
+        immutable $T{S,W} <: ShapePointTransformation
             s::S
             w::W
         end
@@ -94,7 +82,7 @@ for S in (:HollowCylinder, :TSP, :SphericalCap)
     T = Symbol(S, :PT)
 
     @eval begin
-        immutable $T{S,A,W} <: AbstractPointTransform
+        immutable $T{S,A,W} <: ShapePointTransformation
             s::S
             a::A
             w::W
@@ -103,8 +91,7 @@ for S in (:HollowCylinder, :TSP, :SphericalCap)
 end
 
 ### Constructors
-for S in (:Ellipsoid, :EllipticCylinder, :HemiEllipsoid, :Parallelepiped,
-          :RectangularPyramid)
+for S in (:Ellipsoid, :EllipticCylinder, :Parallelepiped, :RectangularPyramid)
 
     T = Symbol(S, :PT)
 
@@ -113,13 +100,13 @@ for S in (:Ellipsoid, :EllipticCylinder, :HemiEllipsoid, :Parallelepiped,
     end
 end
 
-TSPPT(s::TSP                          ) = TSPPT(s, s.b * s.r, s.a^2 * s.b * s.r)
+TSPPT(s::TSP) = TSPPT(s, s.b * s.r, s.a^2 * s.b * s.r)
 
-CubePT(s::Cube                        ) = CubePT(s, s.a^3)
+CubePT(s::Cube) = CubePT(s, s.a^3)
 
-CylinderPT(s::Cylinder                ) = CylinderPT(s, s.c * s.r)
+CylinderPT(s::Cylinder) = CylinderPT(s, s.c * s.r)
 
-SquarePyramidPT(s::SquarePyramid      ) = SquarePyramidPT(s, s.a^2 * s.b)
+SquarePyramidPT(s::SquarePyramid) = SquarePyramidPT(s, s.a^2 * s.b)
 
 TriangularToroidPT(s::TriangularToroid) = TriangularToroidPT(s, s.b * s.c)
 

@@ -1,4 +1,4 @@
-"""    transform(f, s::AbstractShape)
+"""    transform(f, s::Shape)
 
 Maps a function `f(x, y, z)` to another `g(λ, μ, ν) * J(λ, μ, ν)`, where
 `g(λ, μ, ν)` is basically `f(x(λ, μ, ν), y(λ, μ, ν), z(λ, μ, ν))` within the
@@ -6,7 +6,7 @@ volume of the shape `s` but under a change of variables to a rectangular
 domain, and `J(λ, μ, ν)` is the Jacobian determinant of the transformation. The
 limits of the domain are given by `transform_bounds(s)`
 """
-function transform(f, s::AbstractShape)
+function transform(f, s::Shape)
     function g(x, y, z)
         p = Point(x, y, z)
         r = f(x, y, z)
@@ -15,7 +15,7 @@ function transform(f, s::AbstractShape)
     return g
 end
 
-"""    ptransform(s::AbstractShape)
+"""    ptransform(s::Shape)
 
 Returns a function that maps a point `(λ, μ, ν)` on the domain given by
 `transform_bounds(s)` to a tuple `(j, x, y, z)`, where `p = (x, y, z)`
@@ -25,20 +25,20 @@ evaluated on `p`.
 """
 function ptransform end
 
-for S in (:Cube, :Cylinder, :Ellipsoid, :EllipticCylinder, :HemiEllipsoid,
-          :HollowCylinder, :Parallelepiped, :RectangularPyramid, :Sphere,
-          :SphericalCap, :SquarePyramid, :TriangularToroid, :Torus, :TSP)
+for S in (:Cube, :Cylinder, :Ellipsoid, :EllipticCylinder, :HollowCylinder,
+          :Parallelepiped, :RectangularPyramid, :Sphere, :SphericalCap,
+          :SquarePyramid, :TriangularToroid, :Torus, :TSP)
 
     T = Symbol(S, :PT)
 
     @eval begin
         ptransform(s::$S) = $T(s)
-        transform{F}(f::F, s::$S) = Transform(f, $T(s))
+        transform{F}(f::F, s::$S) = FunctionTransformation(f, $T(s))
     end
 end
 
-function (T::Transform)(λ, μ, ν)
-    j, x, y, z = T.p(λ, μ, ν)
+function (T::FunctionTransformation)(λ, μ, ν)
+    j, x, y, z = T.t(λ, μ, ν)
     return j * T.f(x, y, z)
 end
 
@@ -77,17 +77,6 @@ end
     return j, x, y, z
 end
 
-@inline function (T::HemiEllipsoidPT)(λ, θ, φ)
-    sθ, cθ = sincos(θ)
-    sφ, cφ = sincos(φ)
-    λsθ = λ * sθ
-    j = T.w * λ * λsθ
-    x = T.s.a * λsθ * cφ
-    y = T.s.b * λsθ * sφ
-    z = T.s.c * (λ * cθ - 0.5)
-    return j, x, y, z
-end
-
 @inline function (T::CylinderPT)(λ, φ, ν)
     sφ, cφ = sincos(φ)
     ρ = λ * T.s.r
@@ -108,9 +97,9 @@ end
     return j, x, y, z
 end
 
-@inline function (T::TriangularToroidPT)(λ, φ, ν)
+@inline function (T::TriangularToroidPT){N}(λ, φ, ν::N)
     sφ, cφ = sincos(φ)
-    κ = 0.5 * (1 - ν)
+    κ = (1 - ν) * N(0.5)
     ρ = λ * κ * T.s.b + T.s.r
     j = T.w * κ * ρ
     x = ρ * cφ
@@ -144,8 +133,8 @@ end
     return j, x, y, z
 end
 
-@inline function (T::SquarePyramidPT)(λ, μ, ν)
-    κ = 0.5 * (1 - ν)
+@inline function (T::SquarePyramidPT){N}(λ, μ, ν::N)
+    κ = (1 - ν) * N(0.5)
     κa = κ * T.s.a
     j = T.w * κ^2
     x = κa * λ
@@ -154,8 +143,8 @@ end
     return j, x, y, z
 end
 
-@inline function (T::RectangularPyramidPT)(λ, μ, ν)
-    κ = 0.5 * (1 - ν)
+@inline function (T::RectangularPyramidPT){N}(λ, μ, ν::N)
+    κ = (1 - ν) * N(0.5)
     j = T.w * κ^2
     x = κ * T.s.a * λ
     y = κ * T.s.b * μ
@@ -163,8 +152,8 @@ end
     return j, x, y, z
 end
 
-@inline function (T::TSPPT)(λ, μ, ν)
-    κ = 0.5 * (2 - T.s.r * (1 + ν))
+@inline function (T::TSPPT){N}(λ, μ, ν::N)
+    κ = 1 - T.s.r * (1 + ν) * N(0.5)
     κa = κ * T.s.a
     j = T.w * κ^2
     x = κa * λ
@@ -186,17 +175,16 @@ end
 end
 
 ### Variables domains
-transform_bounds(::Sphere            ) = (( 0.0,  0.0,  0.0), (1.0,  1π,  2π))
-transform_bounds(::Ellipsoid         ) = (( 0.0,  0.0,  0.0), (1.0,  1π,  2π))
-transform_bounds(::HemiEllipsoid     ) = (( 0.0,  0.0,  0.0), (1.0, π/2,  2π))
-transform_bounds(::Cylinder          ) = (( 0.0,  -1π, -1.0), (1.0,  1π, 1.0))
-transform_bounds(::HollowCylinder    ) = (( 0.0,  -1π, -1.0), (1.0,  1π, 1.0))
-transform_bounds(::EllipticCylinder  ) = (( 0.0,  -1π, -1.0), (1.0,  1π, 1.0))
-transform_bounds(::TriangularToroid  ) = ((-1.0,  -1π, -1.0), (1.0,  1π, 1.0))
-transform_bounds(::SphericalCap      ) = (( 0.0,  0.0, -1.0), (1.0,  2π, 1.0))
-transform_bounds(::Cube              ) = ((-1.0, -1.0, -1.0), (1.0, 1.0, 1.0))
-transform_bounds(::Parallelepiped    ) = ((-1.0, -1.0, -1.0), (1.0, 1.0, 1.0))
-transform_bounds(::RectangularPyramid) = ((-1.0, -1.0, -1.0), (1.0, 1.0, 1.0))
-transform_bounds(::SquarePyramid     ) = ((-1.0, -1.0, -1.0), (1.0, 1.0, 1.0))
-transform_bounds(::TSP               ) = ((-1.0, -1.0, -1.0), (1.0, 1.0, 1.0))
-transform_bounds(::Torus             ) = (( 0.0,  -1π,  -1π), (1.0,  1π,  1π))
+domain(::Sphere            ) = (( 0.0,  0.0,  0.0), (1.0,  1π,  2π))
+domain(::Ellipsoid         ) = (( 0.0,  0.0,  0.0), (1.0,  1π,  2π))
+domain(::Cylinder          ) = (( 0.0,  -1π, -1.0), (1.0,  1π, 1.0))
+domain(::HollowCylinder    ) = (( 0.0,  -1π, -1.0), (1.0,  1π, 1.0))
+domain(::EllipticCylinder  ) = (( 0.0,  -1π, -1.0), (1.0,  1π, 1.0))
+domain(::TriangularToroid  ) = ((-1.0,  -1π, -1.0), (1.0,  1π, 1.0))
+domain(::SphericalCap      ) = (( 0.0,  0.0, -1.0), (1.0,  2π, 1.0))
+domain(::Cube              ) = ((-1.0, -1.0, -1.0), (1.0, 1.0, 1.0))
+domain(::Parallelepiped    ) = ((-1.0, -1.0, -1.0), (1.0, 1.0, 1.0))
+domain(::RectangularPyramid) = ((-1.0, -1.0, -1.0), (1.0, 1.0, 1.0))
+domain(::SquarePyramid     ) = ((-1.0, -1.0, -1.0), (1.0, 1.0, 1.0))
+domain(::TSP               ) = ((-1.0, -1.0, -1.0), (1.0, 1.0, 1.0))
+domain(::Torus             ) = (( 0.0,  -1π,  -1π), (1.0,  1π,  1π))

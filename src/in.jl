@@ -1,6 +1,6 @@
 SameXYZLength = Union{Cube,Sphere}
 SameXYLength  = Union{Cylinder,SphericalCap,SquarePyramid}
-NoSameLength  = Union{Ellipsoid,EllipticCylinder,HemiEllipsoid,Parallelepiped,
+NoSameLength  = Union{Ellipsoid,EllipticCylinder,Parallelepiped,
                       RectangularPyramid}
 
 halflengths(s::SameXYZLength   ) = Vec(s[1], s[1], s[1])
@@ -12,7 +12,7 @@ halflengths(s::Torus           ) = Vec(s[1] + s[2], s[1] + s[2], s[2])
 halflengths(s::TriangularToroid) = Vec(s[1] + s[2], s[1] + s[2], s[3])
 
 
-"""    in(p::Point, s::AbstractShape)
+"""    in(p::Point, s::Shape)
 
 Returns `true` if the point `p` lies inside or in the boundary of `s`,
 or `false` otherwise.

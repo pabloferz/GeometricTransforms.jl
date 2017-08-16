@@ -4,27 +4,28 @@ Simple [Julia](https://julialang.org/) library, that defines some origin
 centered geometric objects (`Ellipsoid`, `TruncatedSquarePyramid`, `Torus`,
 among others).
 
-The main functions here are `transform(f, s::AbstractShape)`, `ptransform(s::AbstractShape)` and 
-`transform_bounds(s::AbstractShape)`. The first one maps a function `f(x, y, z)`
-to another `g(λ, μ, ν) * J(λ, μ, ν)`, where `g(λ, μ, ν)` is basically
-`f(x(λ, μ, ν), y(λ, μ, ν), z(λ, μ, ν))` within the volume of a shape `s` but under a change of variables to
-a rectangular domain defined by `(λ, μ, ν)` and `J(λ, μ, ν)` is the
-[Jacobian determinant](https://en.wikipedia.org/wiki/Jacobian_matrix_and_determinant)
-of the transformation. The limits of the domain are given by `transform_bounds(s)`.
+The main functions here are `transform(f, s::Shape)`, `ptransform(s::Shape)`
+and `domain(s::Shape)`. The first one maps a function `f(x, y, z)` to another
+`g(λ, μ, ν) * J(λ, μ, ν)`, where `g(λ, μ, ν)` is basically `f(x(λ, μ, ν), y(λ,
+μ, ν), z(λ, μ, ν))` within the volume of a shape `s` but under a change of
+variables to a rectangular domain defined by `(λ, μ, ν)` and `J(λ, μ, ν)` is
+the [Jacobian
+determinant](https://en.wikipedia.org/wiki/Jacobian_matrix_and_determinant) of
+the transformation. The limits of the domain are given by `domain(s)`.
 
-`ptransform(s::AbstractShape)` returns a function that maps a point `(λ, μ, ν)` on the domain given by
-`transform_bounds(s)` to a tuple `(j, x, y, z)`, where `p = (x, y, z)`
+`ptransform(s::Shape)` returns a function that maps a point `(λ, μ, ν)` on the
+domain given by `domain(s)` to a tuple `(j, x, y, z)`, where `p = (x, y, z)`
 corresponds to the cartesian coordinates of a point inside `s`, and `j` is the
 is the Jacobian determinant of the transformation `(x, y, z) ↦ (λ, μ, ν)`
 evaluated on `p`.
 
 `transform(f, s)` can be used together with an integration library, *e.g.*
-[NIntegration.jl](https://github.com/pabloferz/NIntegration.jl), to find out the
-integral of the function `f` within the region bounded by the surface of the
-shape `s`.
+[NIntegration.jl](https://github.com/pabloferz/NIntegration.jl), to find out
+the integral of the function `f` within the region bounded by the surface of
+the shape `s`.
 
-It also extends the `Base` method `in` to determine if a point in three dimensions
-lies within the volume defined by each object.
+It also extends the `Base` method `in` to determine if a point in three
+dimensions lies within the volume defined by each object.
 
 ## Installation
 
@@ -43,7 +44,8 @@ Once installed, run
 using GeometricTransforms
 ```
 
-Let's see how the library can be used along an integration library to approximate the volume of a sphere of radius `1`.
+Let's see how the library can be used along an integration library to
+approximate the volume of a sphere of radius `1`.
 
 ```julia
 julia> using GeometricTransforms
@@ -68,7 +70,7 @@ julia> let
            S = Sphere(r)
            f = (x, y, z) -> 1.0
            integrand = transform(f, S)
-           xmin, xmax = transform_bounds(S)
+           xmin, xmax = domain(S)
            @btime nintegrate($integrand, $xmin, $xmax)
        end
   4.541 μs (46 allocations: 1.05 KiB)
@@ -79,7 +81,7 @@ julia> let
            S = Sphere(r)
            f = (x, y, z) -> 1.0
            integrand = transform(f, S)
-           xmin, xmax = transform_bounds(S)
+           xmin, xmax = domain(S)
            @btime nintegrate($integrand, $xmin, $xmax, reltol=1e-10)
        end
   62.387 μs (345 allocations: 9.31 KiB)
@@ -88,7 +90,3 @@ julia> let
 julia> 4π / 3
 4.1887902047863905
 ```
-
-**TODO**
-
-- [ ] Add more shapes and transforms

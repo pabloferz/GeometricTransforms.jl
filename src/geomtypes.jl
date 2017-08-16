@@ -1,14 +1,14 @@
-abstract type AbstractShape{N,T} <: FieldVector{N,T} end
+abstract type Shape{N,T} <: FieldVector{N,T} end
 
-struct Cube{T} <: AbstractShape{3,T}
+struct Cube{T} <: Shape{3,T}
     a::T
 end
 
-struct Sphere{T} <: AbstractShape{3,T}
+struct Sphere{T} <: Shape{3,T}
     r::T
 end
 
-struct SphericalCap{T} <: AbstractShape{3,T}
+struct SphericalCap{T} <: Shape{3,T}
     a::T
     c::T
     function SphericalCap{T}(a, c) where {T}
@@ -19,9 +19,9 @@ struct SphericalCap{T} <: AbstractShape{3,T}
     end
 end
 
-for shape in (:Ellipsoid, :EllipticCylinder, :HemiEllipsoid, :Parallelepiped)
+for shape in (:Ellipsoid, :EllipticCylinder, :Parallelepiped)
     @eval begin
-        struct $shape{T} <: AbstractShape{3,T}
+        struct $shape{T} <: Shape{3,T}
             a::T
             b::T
             c::T
@@ -35,7 +35,7 @@ for shape in (:Ellipsoid, :EllipticCylinder, :HemiEllipsoid, :Parallelepiped)
     end
 end
 
-struct Cylinder{T} <: AbstractShape{3,T}
+struct Cylinder{T} <: Shape{3,T}
     r::T
     c::T
     function Cylinder{T}(r, c) where {T}
@@ -46,7 +46,7 @@ struct Cylinder{T} <: AbstractShape{3,T}
     end
 end
 
-struct HollowCylinder{T} <: AbstractShape{3,T}
+struct HollowCylinder{T} <: Shape{3,T}
     R::T
     r::T
     c::T
@@ -60,7 +60,7 @@ struct HollowCylinder{T} <: AbstractShape{3,T}
     end
 end
 
-struct SquarePyramid{T,S} <: AbstractShape{3,T}
+struct SquarePyramid{T,S} <: Shape{3,T}
     a::T
     b::T
     m::S
@@ -73,7 +73,7 @@ struct SquarePyramid{T,S} <: AbstractShape{3,T}
     end
 end
 
-struct RectangularPyramid{T,S} <: AbstractShape{3,T}
+struct RectangularPyramid{T,S} <: Shape{3,T}
     a::T
     b::T
     c::T
@@ -89,7 +89,7 @@ struct RectangularPyramid{T,S} <: AbstractShape{3,T}
     end
 end
 
-immutable TriangularToroid{T} <: AbstractShape{T}
+immutable TriangularToroid{T} <: Shape{T}
     r::T
     b::T
     c::T
@@ -104,7 +104,7 @@ immutable TriangularToroid{T} <: AbstractShape{T}
     end
 end
 
-struct TruncatedSquarePyramid{T,R,S} <: AbstractShape{3,T}
+struct TruncatedSquarePyramid{T,R,S} <: Shape{3,T}
     a::T
     b::T
     r::R
@@ -119,7 +119,7 @@ struct TruncatedSquarePyramid{T,R,S} <: AbstractShape{3,T}
     end
 end
 
-struct Torus{T} <: AbstractShape{3,T}
+struct Torus{T} <: Shape{3,T}
     R::T
     r::T
 end
