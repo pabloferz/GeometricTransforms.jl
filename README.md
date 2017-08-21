@@ -4,7 +4,7 @@ Simple [Julia](https://julialang.org/) library, that defines some origin
 centered geometric objects (`Ellipsoid`, `TruncatedSquarePyramid`, `Torus`,
 among others).
 
-The main functions here are `transform(f, s::Shape)`, `ptransform(s::Shape)`
+The main functions here are `ftransform(f, s::Shape)`, `ptransform(s::Shape)`
 and `domain(s::Shape)`. The first one maps a function `f(x, y, z)` to another
 `g(λ, μ, ν) * J(λ, μ, ν)`, where `g(λ, μ, ν)` is basically `f(x(λ, μ, ν), y(λ,
 μ, ν), z(λ, μ, ν))` within the volume of a shape `s` but under a change of
@@ -19,7 +19,7 @@ corresponds to the cartesian coordinates of a point inside `s`, and `j` is the
 is the Jacobian determinant of the transformation `(x, y, z) ↦ (λ, μ, ν)`
 evaluated on `p`.
 
-`transform(f, s)` can be used together with an integration library, *e.g.*
+`ftransform(f, s)` can be used together with an integration library, *e.g.*
 [NIntegration.jl](https://github.com/pabloferz/NIntegration.jl), to find out
 the integral of the function `f` within the region bounded by the surface of
 the shape `s`.
@@ -69,7 +69,7 @@ julia> let
            r = 1.0
            S = Sphere(r)
            f = (x, y, z) -> 1.0
-           integrand = transform(f, S)
+           integrand = ftransform(f, S)
            xmin, xmax = domain(S)
            @btime nintegrate($integrand, $xmin, $xmax)
        end
@@ -80,7 +80,7 @@ julia> let
            r = 1.0
            S = Sphere(r)
            f = (x, y, z) -> 1.0
-           integrand = transform(f, S)
+           integrand = ftransform(f, S)
            xmin, xmax = domain(S)
            @btime nintegrate($integrand, $xmin, $xmax, reltol=1e-10)
        end
