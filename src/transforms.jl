@@ -1,12 +1,12 @@
-"""    transform(f, s::Shape)
+"""    ftransform(f, s::Shape)
 
 Maps a function `f(x, y, z)` to another `g(λ, μ, ν) * J(λ, μ, ν)`, where
 `g(λ, μ, ν)` is basically `f(x(λ, μ, ν), y(λ, μ, ν), z(λ, μ, ν))` within the
 volume of the shape `s` but under a change of variables to a rectangular
 domain, and `J(λ, μ, ν)` is the Jacobian determinant of the transformation. The
-limits of the domain are given by `transform_bounds(s)`
+limits of the domain are given by `domain(s)`
 """
-function transform(f, s::Shape)
+function ftransform(f, s::Shape)
     function g(x, y, z)
         p = Point(x, y, z)
         r = f(x, y, z)
@@ -18,10 +18,9 @@ end
 """    ptransform(s::Shape)
 
 Returns a function that maps a point `(λ, μ, ν)` on the domain given by
-`transform_bounds(s)` to a tuple `(j, x, y, z)`, where `p = (x, y, z)`
-corresponds to the cartesian coordinates of a point inside `s`, and `j` is the
-is the Jacobian determinant of the transformation `(x, y, z) ↦ (λ, μ, ν)`
-evaluated on `p`.
+`domain(s)` to a tuple `(j, x, y, z)`, where `p = (x, y, z)` corresponds to the
+cartesian coordinates of a point inside `s`, and `j` is the is the Jacobian
+determinant of the transformation `(x, y, z) ↦ (λ, μ, ν)` evaluated on `p`.
 """
 function ptransform end
 
@@ -33,7 +32,7 @@ for S in (:Cube, :Cylinder, :Ellipsoid, :EllipticCylinder, :HollowCylinder,
 
     @eval begin
         ptransform(s::$S) = $T(s)
-        transform{F}(f::F, s::$S) = FunctionTransformation(f, $T(s))
+        ftransform{F}(f::F, s::$S) = FunctionTransformation(f, $T(s))
     end
 end
 
