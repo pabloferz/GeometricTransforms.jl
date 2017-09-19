@@ -8,6 +8,7 @@ halflengths(s::SameXYLength    ) = Vec(s[1], s[1], s[2])
 halflengths(s::NoSameLength    ) = Vec(s[1], s[2], s[3])
 halflengths(s::HollowCylinder  ) = Vec(s[1], s[1], s[3])
 halflengths(s::TSP             ) = Vec(s[1], s[1], s[2] * s[3])
+halflengths(s::Ring            ) = Vec(s[1] + s[2], s[1] + s[2], s[3])
 halflengths(s::Torus           ) = Vec(s[1] + s[2], s[1] + s[2], s[2])
 halflengths(s::TriangularToroid) = Vec(s[1] + s[2], s[1] + s[2], s[3])
 

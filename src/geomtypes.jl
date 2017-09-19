@@ -119,6 +119,12 @@ struct TruncatedSquarePyramid{T,R,S} <: Shape{3,T}
     end
 end
 
+struct Ring{T} <: Shape{3,T}
+    R::T
+    a::T
+    b::T
+end
+
 struct Torus{T} <: Shape{3,T}
     R::T
     r::T

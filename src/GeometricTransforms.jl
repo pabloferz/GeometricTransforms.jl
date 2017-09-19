@@ -21,7 +21,7 @@ include(joinpath(path, "transforms.jl"))
 
 ### Exports
 export Shape, Cube, Cylinder, Ellipsoid, EllipticCylinder, HollowCylinder,
-       Parallelepiped, Point, RectangularPyramid, Sphere, SphericalCap,
+       Parallelepiped, Point, RectangularPyramid, Ring, Sphere, SphericalCap,
        SquarePyramid, TSP, TriangularToroid, TruncatedSquarePyramid, Torus,
        Vec, domain, halflengths, ftransform, ptransform
 

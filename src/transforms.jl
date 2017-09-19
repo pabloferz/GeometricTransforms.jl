@@ -25,7 +25,7 @@ determinant of the transformation `(x, y, z) ↦ (λ, μ, ν)` evaluated on `p`.
 function ptransform end
 
 for S in (:Cube, :Cylinder, :Ellipsoid, :EllipticCylinder, :HollowCylinder,
-          :Parallelepiped, :RectangularPyramid, :Sphere, :SphericalCap,
+          :Parallelepiped, :RectangularPyramid, :Ring, :Sphere, :SphericalCap,
           :SquarePyramid, :TriangularToroid, :Torus, :TSP)
 
     T = Symbol(S, :PT)
@@ -161,6 +161,18 @@ end
     return j, x, y, z
 end
 
+@inline function (T::RingPT)(λ, θ, φ)
+    sθ, cθ = sincos(θ)
+    sφ, cφ = sincos(φ)
+    aλ = T.s.a * λ
+    ρ = aλ * cθ + T.s.R
+    j = T.s.b * aλ * ρ
+    x = ρ * cφ
+    y = ρ * sφ
+    z = T.s.b * λ * sθ
+    return j, x, y, z
+end
+
 @inline function (T::TorusPT)(λ, θ, φ)
     sθ, cθ = sincos(θ)
     sφ, cφ = sincos(φ)
@@ -186,4 +198,5 @@ domain(::Parallelepiped    ) = ((-1.0, -1.0, -1.0), (1.0, 1.0, 1.0))
 domain(::RectangularPyramid) = ((-1.0, -1.0, -1.0), (1.0, 1.0, 1.0))
 domain(::SquarePyramid     ) = ((-1.0, -1.0, -1.0), (1.0, 1.0, 1.0))
 domain(::TSP               ) = ((-1.0, -1.0, -1.0), (1.0, 1.0, 1.0))
+domain(::Ring              ) = (( 0.0,  -1π,  -1π), (1.0,  1π,  1π))
 domain(::Torus             ) = (( 0.0,  -1π,  -1π), (1.0,  1π,  1π))

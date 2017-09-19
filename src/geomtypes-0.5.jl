@@ -119,6 +119,12 @@ immutable TruncatedSquarePyramid{T,R,S} <: Shape{T}
     end
 end
 
+immutable Ring{T} <: Shape{T}
+    R::T
+    a::T
+    b::T
+end
+
 immutable Torus{T} <: Shape{T}
     R::T
     r::T
