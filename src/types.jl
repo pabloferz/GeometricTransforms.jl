@@ -53,7 +53,7 @@ immutable FunctionTransformation{F,T<:ShapePointTransformation}
     t::T
 end
 
-for S in (:Sphere, :Torus)
+for S in (:Ring, :Sphere, :Torus)
 
     T = Symbol(S, :PT)
 
