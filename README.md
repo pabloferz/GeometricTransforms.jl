@@ -90,3 +90,7 @@ julia> let
 julia> 4π / 3
 4.1887902047863905
 ```
+
+## Acknowledgements
+
+This work was financially supported by CONACYT through grant 354884.
